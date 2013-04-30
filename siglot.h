@@ -6,8 +6,11 @@
 
 //=============================================
 // @filename     siglot.h
+// @date         April 30th 2013
 // @author       Sheljohn (Jonathan H)
 // @contact      sh3ljohn+siglot [at] gmail
+// @license      Creative Commons by-nc-sa 3.0 
+//               http://creativecommons.org/licenses/by-nc-sa/3.0/
 //=============================================
 
 namespace siglot
@@ -23,14 +26,9 @@ struct VoidData {};
 /**
  * The Slot interface as seen by a Signal object.
  */
-template <typename T>
+template <typename data_type>
 class CallbackInterface
 {
-public:
-
-	typedef T data_type;
-	typedef const data_type& data_input;
-
 protected:
 
 	template <typename U> friend class Signal;
@@ -39,7 +37,7 @@ protected:
 	virtual void disable_signal() =0;
 
 	// Trigger the callback function
-	virtual void operator() ( data_input data ) =0;
+	virtual void operator() ( const data_type& data ) =0;
 };
 
 
@@ -56,12 +54,12 @@ protected:
  * - detach: a specific Slot goes off
  * - count : returns the number of currently attached Slots
  */
-template <typename T>
+template <typename data_type>
 class SlotList
 {
 public:
 
-	typedef CallbackInterface<T> slot_type;
+	typedef CallbackInterface<data_type> slot_type;
 	typedef slot_type* slot_ptr;
 
 protected:
@@ -85,12 +83,11 @@ protected:
  * - detach_signal : delete pointer to this Slot in the Signal's set
  * - disable_signal: set the local pointer to the attached Signal to 0
  */
-template <typename T>
-class ListenerInterface : public CallbackInterface<T>
+template <typename data_type>
+class ListenerInterface : public CallbackInterface<data_type>
 {
 public:
 
-	typedef T data_type;
 	typedef SlotList<data_type> signal_type;
 	typedef signal_type* signal_ptr;
 
@@ -126,22 +123,22 @@ protected:
  * The template argument corresponds to the type of the "event data structure".
  * The method "invoke" triggers the callback functions of all attached Slots.
  */
-template <typename T = VoidData>
-struct Signal : public SlotList<T>
+template <typename data_type = VoidData>
+struct Signal : public SlotList<data_type>
 {
-	T data;
+	data_type data;
 
 	~Signal() { clear(); }
 
 	void clear()
 		{ 
-			for ( auto it : this->slots ) it->disable_signal();
+			for ( auto slot : this->slots ) slot->disable_signal();
 			this->slots.clear();
 		}
 
 	void invoke()
 		{
-			for ( auto it : this->slots ) (*it)(data);
+			for ( auto slot : this->slots ) (*slot)(data);
 		}
 };
 
@@ -154,15 +151,15 @@ struct Signal : public SlotList<T>
  *
  * NOTE:
  * The callback function must have the following signature
- * void callback_function( const T& data )
+ * void callback_function( const data_type& data )
  */
-template <typename T = VoidData>
-class Slot : public ListenerInterface<T>
+template <typename data_type = VoidData>
+class Slot : public ListenerInterface<data_type>
 {
 public:
 
-	typedef const T& data_input;
-	typedef void (*callback_type)(data_input);
+	typedef const data_type& data_input;
+	typedef void (*callback_type)( data_input );
 
 	Slot() { clear(); }
 	Slot( callback_type f ) { bind(f); }
@@ -218,18 +215,17 @@ protected:
  * - is_active: tells if the Slot is connected to a Signal
  *
  * NOTE: The binding function is used as follows:
- * MemberSlot<R,T> slot;
- * slot.bind(this, &R::callback_function);
+ * MemberSlot<handle_type,data_type> slot;
+ * slot.bind(this, &handle_type::callback_function);
  */
-template <typename R, typename T = VoidData>
-class MemberSlot : public ListenerInterface<T>
+template <typename handle_type, typename data_type = VoidData>
+class MemberSlot : public ListenerInterface<data_type>
 {
 public:
 
-	typedef R handle_type;
 	typedef handle_type* handle_ptr;
-	typedef const T& data_input;
-	typedef void (R::*callback_type)(data_input);
+	typedef const data_type& data_input;
+	typedef void (handle_type::*callback_type)( data_input );
 
 	MemberSlot() { clear(); }
 	MemberSlot( handle_ptr h, callback_type f ) { bind(h,f); }
@@ -264,15 +260,14 @@ protected:
  *
  * NOTE: Same remark as before for the member callback function signature.
  */
-template <typename R>
-class MemberSlot<R,VoidData> : public ListenerInterface<VoidData>
+template <typename handle_type>
+class MemberSlot<handle_type,VoidData> : public ListenerInterface<VoidData>
 {
 public:
 
-	typedef R handle_type;
 	typedef handle_type* handle_ptr;
 	typedef const VoidData& data_input;
-	typedef void (R::*callback_type)();
+	typedef void (handle_type::*callback_type)();
 
 	MemberSlot() { clear(); }
 	MemberSlot( handle_ptr h, callback_type f ) { bind(h,f); }
