@@ -26,8 +26,19 @@ Three useful classes are defined in this header:
 
 ### Basic Rules
 
-+ The event data should be accessed and modified directly via the corresponding `Signal` instance, using the member `data` of type `data_type`.
-+ The default data type is `VoidData`, which is an empty `struct`. Signals and slots without data should be declared respectively as `Signal<> signal;` and `Slot<> slot` or `MemberSlot<handle_type> slot;`.
++ Event data should be accessed/modified via the corresponding `Signal` instance, using the member `data` of type `data_type`.
++ `data_type` defaults to `VoidData`, which is an empty `struct`. Signals and slots void data should be declared respectively as `Signal<> signal;` and `Slot<> slot` or `MemberSlot<handle_type> slot;`.
 + The `Slot` class should be used only with non-member callback functions, whereas the `MemberSlot` class should be used only with member callback functions.
-+ The generic signature of any callback function is `void callback_function( const data_type& data );`, __UNLESS__ slots without data are used, in which case the prototype/signature of callback functions is simply `void callback_function();`.
++ The generic signature of any callback function is `void callback_function( const data_type& data );`, __unless__ slots without data are used, in which case the prototype/signature of callback functions is simply `void callback_function();`.
 + Slots can only be attached to signals with the __same__ `data_type`.
+
+### The `Signal` class
+
+A `Signal` instance stores its listeners (either `Slot`s or `MemberSlot`s) in a `std::set`. That way, duplicates are handled transparently without affecting the iteration complexity, and specific listener access/deletion are logarithmic in the number of listeners.
+
+| Element | Description |
+|---|---|
+| `data_type data;` | Public member. Use to access/modify data before triggering an event. |
+| `void clear();` | Public method. Clear the list of listeners. _Complexity:_ linear in the current number of listeners. |
+| `unsigned count() const;` | Public inherited method. Returns the current number of listeners. _Complexity:_ constant. |
+| `void invoke();` | Public method. Triggers all attached callback functions. _Complexity:_ linear in the number of listeners. |

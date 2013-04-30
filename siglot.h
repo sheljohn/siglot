@@ -62,6 +62,8 @@ public:
 	typedef CallbackInterface<data_type> slot_type;
 	typedef slot_type* slot_ptr;
 
+	inline const unsigned& count() const { return slots.size(); }
+
 protected:
 
 	template <typename U> friend class ListenerInterface;
@@ -69,7 +71,6 @@ protected:
 	std::set<slot_ptr> slots;
 	inline void attach( slot_ptr s ) { slots.insert(s); }
 	inline void detach( slot_ptr s ) { slots.erase(s); }
-	inline const unsigned& count() const { return slots.size(); }
 };
 
 
