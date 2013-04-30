@@ -10,9 +10,18 @@ I started this little project to prove that Signals and Slots could be implement
 
 Please send bug reports with minimal examples to the address displayed in the header preamble. The plus sign in the e-mail is a real plus sign (I know, it's not common).
 
+### License
+
+Creative Commons, Attribution-ShareAlike Unported 3.0
+Please send me a short message as well to tell me if you use this, and for what. This is for my own curiosity only, and whatever you send me remains private and _will not_ be disclosed in any circumstance.
+
 ---
 
-## Usage
+## Documentation
+
+### Examples
+
+Examples of usage are provided and commented in the `example.cpp` source file.
 
 ### Useful Classes
 
@@ -38,7 +47,15 @@ A `Signal` instance stores its listeners (either `Slot`s or `MemberSlot`s) in a 
 
 | Element | Description |
 |---|---|
-| `data_type data;` | Public member. Use to access/modify data before triggering an event. |
-| `void clear();` | Public method. Clear the list of listeners. _Complexity:_ linear in the current number of listeners. |
-| `unsigned count() const;` | Public inherited method. Returns the current number of listeners. _Complexity:_ constant. |
-| `void invoke();` | Public method. Triggers all attached callback functions. _Complexity:_ linear in the number of listeners. |
+| `data_type data;` | [Member] Use to access/modify data before triggering an event. |
+| `void clear();` | Clear the list of listeners. _Complexity:_ linear in the current number of listeners. |
+| `unsigned count() const;` | Return the current number of listeners. _Complexity:_ constant. |
+| `void invoke();` | Trigger all attached callback functions. _Complexity:_ linear in the number of listeners. |
+
+More precisely, the `invoke` method loops over the set of slots and triggers the corresponding callback function. In effect, each trigger is equivalent to one indirection and a function call.
+
+### The `Slot` class
+
+
+### The `MemberSlot` class
+

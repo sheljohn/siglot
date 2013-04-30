@@ -9,8 +9,8 @@
 // @date         April 30th 2013
 // @author       Sheljohn (Jonathan H)
 // @contact      sh3ljohn+siglot [at] gmail
-// @license      Creative Commons by-nc-sa 3.0 
-//               http://creativecommons.org/licenses/by-nc-sa/3.0/
+// @license      Creative Commons by-sa 3.0 
+//               http://creativecommons.org/licenses/by-sa/3.0/
 //=============================================
 
 namespace siglot
