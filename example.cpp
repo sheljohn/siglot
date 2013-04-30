@@ -25,6 +25,10 @@ struct EventData
 
 /**
  * Declare a Signal using the EventData structure.
+ *
+ * NOTE: Signals without data (default data_type = VoidData)
+ * can be declared using:
+ *     Signal<VoidData> signal;   OR   Signal<> signal;
  */
 Signal<EventData> my_signal;
 
@@ -56,6 +60,14 @@ struct SomeClass
     /**
      * Declare a MemberSlot for the class SomeClass using the 
      * EventData structure.
+     *
+     * NOTE: MemberSlots without data can be declared using:
+     *     MemberSlot<HandleType,VoidData> slot;
+     *         OR simply
+     *     MemberSlot<HandleType> slot;
+     *
+     * Make sure the Callback prototype/signature then complies 
+     * with the rules mentionned above.
      */
     MemberSlot<SomeClass,EventData> mslot;
 
@@ -76,7 +88,7 @@ struct SomeClass
     /**
      * Example of a member callback function.
      *
-     * NOTE: The same rules as mentionned before apply as far as 
+     * NOTE: The same rules as mentionned above apply as far as 
      * the method's signature is concerned.
      */
     void member_callback( const EventData& data )
@@ -146,8 +158,9 @@ int main()
     my_signal.invoke();
 
     /**
-     * Alternatively MemberSlots are automatically detached upon 
-     * desctruction of the instance holding them. 
+     * Alternatively Slots/MemberSlots are automatically detached 
+     * upon their desctruction. Note that they are also automatically 
+     * deactivated if the Signal is destroyed.
      */
     my_signal.data.s = "None";
     my_class.~SomeClass();
