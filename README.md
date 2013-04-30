@@ -1,6 +1,6 @@
 #Siglot: Signal and Slots made simpler for everyone
 
-Siglot is an easy to read/understand, standalone, single-header, STL-only, C++11 implementation of Signals and Slots.
+Siglot is a clean, easy to read/understand, standalone, single-header, STL-only, C++11 implementation of Signals and Slots.
 
 ### About
 
@@ -13,3 +13,16 @@ Please send bug reports with minimal examples to the address displayed in the he
 ---
 
 ## Usage
+
+### Useful Classes
+
+Three useful classes are defined in this header:
+
+| Class Name   | Description |
+|:---:|---|
+| `Signal`     |  |
+| `Slot`       |  |
+| `MemberSlot` |  |
+
+### Basic Rules
+

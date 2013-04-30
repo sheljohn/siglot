@@ -55,7 +55,7 @@ protected:
  * - count : returns the number of currently attached Slots
  */
 template <typename data_type>
-class SlotList
+class SlotSet
 {
 public:
 
@@ -88,7 +88,7 @@ class ListenerInterface : public CallbackInterface<data_type>
 {
 public:
 
-	typedef SlotList<data_type> signal_type;
+	typedef SlotSet<data_type> signal_type;
 	typedef signal_type* signal_ptr;
 
 	void detach()
@@ -124,7 +124,7 @@ protected:
  * The method "invoke" triggers the callback functions of all attached Slots.
  */
 template <typename data_type = VoidData>
-struct Signal : public SlotList<data_type>
+struct Signal : public SlotSet<data_type>
 {
 	data_type data;
 
