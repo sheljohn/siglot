@@ -15,6 +15,8 @@ Please send bug reports with minimal examples to the address displayed in the he
 Creative Commons, Attribution-ShareAlike Unported 3.0
 Please send me a short message as well to tell me if you use this, and for what. This is for my own curiosity only, and whatever you send me remains private and _will not_ be disclosed in any circumstance.
 
+<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
+
 ---
 
 ## Documentation
