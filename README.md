@@ -12,8 +12,7 @@ Please send bug reports with minimal examples to the address displayed in the he
 
 ### License
 
-Creative Commons, Attribution-ShareAlike Unported 3.0
-Please send me a short message as well to tell me if you use this, and for what. This is for my own curiosity only, and whatever you send me remains private and _will not_ be disclosed in any circumstance.
+For my own curiosity only, please send me a short message as well to tell me if you use this, and what for. Rest assured that whatever you send me will remain private and _will not_ be disclosed under any circumstance.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
 
@@ -54,10 +53,15 @@ A `Signal` instance stores its listeners (either `Slot`s or `MemberSlot`s) in a 
 | `unsigned count() const;` | Return the current number of listeners. _Complexity:_ constant. |
 | `void invoke();` | Trigger all attached callback functions. _Complexity:_ linear in the number of listeners. |
 
-More precisely, the `invoke` method loops over the set of slots and triggers the corresponding callback function. In effect, each trigger is equivalent to one indirection and a function call.
+More precisely, the `invoke` method loops over the set of slots and triggers the corresponding callback function for each slot. In effect, each of these trigger is equivalent to one indirection and a function call (which is nearly optimal?).
 
 ### The `Slot` class
 
+A `Slot` instance can be thought of as a relay between the signal and a callback function. The most important method is `inline void bind( callback_type f );` which binds the instance to a non-member callback function of type `void (*function)( const data_type& data )` when `data_type` is not `VoidData`, and `void (*function)()` otherwise; hence the prototype restrictions mentionned above.
 
 ### The `MemberSlot` class
 
+A `MemberSlot` instance can be thought of as a relay between the signal and a callback method. The most important method is `inline void bind( handle_ptr h, callback_type f );` which binds the slot instance to:
+
++ An instance of the class `handle_type` defining the callback method; 
++ A member callback method of type `void (handle_type::*function)( const data_type& data )` when `data_type` is not `VoidData`, and `void (handle_type::*function)()` otherwise; hence the prototype restrictions mentionned above.
