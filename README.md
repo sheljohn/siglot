@@ -18,11 +18,11 @@ Please send bug reports with minimal examples to the address displayed in the he
 
 Three useful classes are defined in this header:
 
-| Class Name   | Description |
-|:---:|---|
-| `Signal`     |  |
-| `Slot`       |  |
-| `MemberSlot` |  |
+| Class Name   | Template Parameters | Description |
+|:---:|---|---|
+| `Signal`     | `data_type` | Defines a signal sending data of type `data_type`. |
+| `Slot`       | `data_type` | Defines a slot bound to a non-member callback function, which receives data of type `const data_type&`. |
+| `MemberSlot` | `handle_type`, `data_type` | Defines a slot bound to an instance of type `handle_type`, and a member callback function which receives data of type `const data_type&`. |
 
 ### Basic Rules
 
