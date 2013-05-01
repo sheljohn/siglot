@@ -1,4 +1,4 @@
-#Siglot: Signal and Slots just got simpler
+#Siglot: Signals and Slots just got simpler
 
 Siglot is a clean, easy to read/understand, standalone, single-header, STL-only, C++11 implementation of Signals and Slots.
 
@@ -61,8 +61,8 @@ A `Slot` instance can be thought of as a relay between the signal and a callback
 
 Both the `Slot` and `MemberSlot` provide the following methods/features as well:
 + Binding upon construction: an instance can be constructed with the same inputs than that of the corresponding `bind` function;
-+ Rebinding to another callback/instance of same type is supported, using the method `bind` as well;
-+ `bool is_active() const`: tells if the slot is attached to a signal.
++ Rebinding to another callback/instance of same type is also supported, using the method `bind` to overwrite previous data;
++ `bool is_active() const`: tells if the slot is attached to a signal;
 + `void clear()`: detach the slot from the corresponding signal.
 
 ### The `MemberSlot` class
