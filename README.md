@@ -22,7 +22,7 @@ For my own curiosity only, please send me a short message as well to tell me if 
 
 ### Examples
 
-Examples of usage are provided and commented in the `example.cpp` source file.
+Examples of usage are provided and commented in the `example.cpp` source file. You can compile it using the `makefile` provided. _Note: You will need g++ 4.7.2+ or another recent compiler supporting C++11 to compile these sources._
 
 ### Useful Classes
 
