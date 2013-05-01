@@ -1,4 +1,4 @@
-#Siglot: Signal and Slots made simpler for everyone
+#Siglot: Signal and Slots just got simpler
 
 Siglot is a clean, easy to read/understand, standalone, single-header, STL-only, C++11 implementation of Signals and Slots.
 
@@ -59,9 +59,17 @@ More precisely, the `invoke` method loops over the set of slots and triggers the
 
 A `Slot` instance can be thought of as a relay between the signal and a callback function. The most important method is `inline void bind( callback_type f );` which binds the instance to a non-member callback function of type `void (*function)( const data_type& data )` when `data_type` is not `VoidData`, and `void (*function)()` otherwise; hence the prototype restrictions mentionned above.
 
+Both the `Slot` and `MemberSlot` provide the following methods/features as well:
++ Binding upon construction: an instance can be constructed with the same inputs than that of the corresponding `bind` function;
++ Rebinding to another callback/instance of same type is supported, using the method `bind` as well;
++ `bool is_active() const`: tells if the slot is attached to a signal.
++ `void clear()`: detach the slot from the corresponding signal.
+
 ### The `MemberSlot` class
 
 A `MemberSlot` instance can be thought of as a relay between the signal and a callback method. The most important method is `inline void bind( handle_ptr h, callback_type f );` which binds the slot instance to:
 
-+ An instance of the class `handle_type` defining the callback method; 
-+ A member callback method of type `void (handle_type::*function)( const data_type& data )` when `data_type` is not `VoidData`, and `void (handle_type::*function)()` otherwise; hence the prototype restrictions mentionned above.
++ An instance of type `handle_type` which defines the callback method; 
++ The corresponding callback method of type `void (handle_type::*function)( const data_type& data )` when `data_type` is not `VoidData`, and `void (handle_type::*function)()` otherwise; hence the prototype restrictions mentionned above.
+
+See the description of `Slot`, second paragraph, for additional methods/features.
