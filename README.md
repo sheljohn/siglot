@@ -53,7 +53,7 @@ A `Signal` instance stores its listeners (either `Slot`s or `MemberSlot`s) in a 
 | `data_type data;` | [Member] Use to access/modify data before triggering an event. |
 | `void clear();` | Clear the list of listeners. _Complexity:_ linear in the current number of listeners. |
 | `unsigned count() const;` | Return the current number of listeners. _Complexity:_ constant. |
-| `void invoke();` | Trigger all attached callback functions. _Complexity:_ linear in the number of listeners. |
+| `void invoke() const;` | Trigger all attached callback functions. _Complexity:_ linear in the number of listeners. |
 
 More precisely, the `invoke` method loops over the set of slots and triggers the corresponding callback function for each slot. In effect, each of these trigger is equivalent to one indirection and a function call (which is nearly optimal?).
 
