@@ -62,7 +62,7 @@ public:
 	typedef CallbackInterface<data_type> slot_type;
 	typedef slot_type* slot_ptr;
 
-	inline const unsigned& count() const { return slots.size(); }
+	inline unsigned count() const { return slots.size(); }
 
 protected:
 
@@ -137,7 +137,7 @@ struct Signal : public SlotSet<data_type>
 			this->slots.clear();
 		}
 
-	void invoke()
+	void invoke() const
 		{
 			for ( auto slot : this->slots ) (*slot)(data);
 		}

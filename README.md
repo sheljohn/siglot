@@ -22,9 +22,9 @@ For my own curiosity only, please send me a short message as well to tell me if 
 
 ### Examples
 
-Examples of usage are provided and commented in the `example.cpp` source file. You can compile it using the `makefile` provided. 
+Examples of usage are provided and commented in the `example.cpp` source file. You can compile it using the `makefile` provided.
 _**Note 1:** You will need g++ 4.7.2+ or another recent compiler supporting C++11 to compile these sources._
-_**Note 2:** Adapting these sources for older C++ version might be possible without too much effort, contact me if you need to do it, I might be able to help._
+_**Note 2:** Adapting these sources for older C++ versions might be possible without too much effort, contact me if you need to do it, I might be able to help._
 
 ### Useful Classes
 

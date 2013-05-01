@@ -5,7 +5,7 @@
 using namespace std;
 using namespace siglot;
 
-#define PRINT_EVENT_SEPARATOR cout << "----------" << endl;
+#define PRINT_EVENT_SEPARATOR(n) cout << "---------- " << (n) << endl;
 
 
 
@@ -125,7 +125,7 @@ int main()
      * should print.
      */
     my_signal.data.s = "None";
-    PRINT_EVENT_SEPARATOR
+    PRINT_EVENT_SEPARATOR(my_signal.count())
     my_signal.invoke();
 
     /**
@@ -134,7 +134,7 @@ int main()
      */
     my_signal.data.s = "Plain only";
     slot.listen_to( &my_signal );
-    PRINT_EVENT_SEPARATOR
+    PRINT_EVENT_SEPARATOR(my_signal.count())
     my_signal.invoke();
 
     /**
@@ -144,7 +144,7 @@ int main()
      */
     my_signal.data.s = "Both";
     my_class.attach();
-    PRINT_EVENT_SEPARATOR
+    PRINT_EVENT_SEPARATOR(my_signal.count())
     my_signal.invoke();
 
     /**
@@ -154,7 +154,7 @@ int main()
      */
     my_signal.data.s = "Member only";
     slot.detach();
-    PRINT_EVENT_SEPARATOR
+    PRINT_EVENT_SEPARATOR(my_signal.count())
     my_signal.invoke();
 
     /**
@@ -164,6 +164,6 @@ int main()
      */
     my_signal.data.s = "None";
     my_class.~SomeClass();
-    PRINT_EVENT_SEPARATOR
+    PRINT_EVENT_SEPARATOR(my_signal.count())
     my_signal.invoke();
 }
