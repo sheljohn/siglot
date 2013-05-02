@@ -38,9 +38,9 @@ Three useful classes are defined in this header:
 ### Basic Rules
 
 1. Event data should be accessed/modified via the corresponding `Signal` instance, using the member `data` of type `data_type`.
-1. `data_type` defaults to `VoidData`, which is an empty `struct`. Signals and slots with void data should be declared respectively as `Signal<> signal;`, and `Slot<> slot;` or `MemberSlot<handle_type> slot;` (_i.e._ omitting the template argument, but without removing the angular brackets).
-1. The prototype of callback functions/methods must be `void callback_function( const data_type& data );`, __unless__ `data_type = VoidData`, in which case it is simply `void callback_function();`.
-1. In this library, __slots listen to signals__ meanning that the connections between signals and slots are made from the _slots_ interfaces (either `Slot` or `MemberSlot`), using the method `void listen_to( signal_ptr s )` to connect, or `void detach()` to disconnect.
+1. `data_type` defaults to `VoidData`, which is an empty `struct`. Signals and slots with void data should be declared respectively as `Signal<> signal;`, and `Slot<> slot;` or `MemberSlot<handle_type> slot;` ( _i.e._ omitting the template argument, but without removing the angular brackets).
+1. The prototype of callback functions/methods must be `void callback_function( const data_type& data );`, __unless__ `data_type == VoidData`, in which case it is simply `void callback_function();`.
+1. In this library, __slots listen to signals__ meaning that the connections between signals and slots are made from the _slots_ interfaces (either `Slot` or `MemberSlot`), using the method `void listen_to( signal_ptr s )` to connect, or `void detach()` to disconnect.
 1. `Slot`s are used only with non-member callback functions; `MemberSlot`s only with member callback functions.
 1. Slots can only be attached to signals with the __same__ `data_type`.
 1. Boths `Slot`s and `MemberSlot`s can listen to the same `Signal` ( _i.e._ both can be stored in the signal's set).
