@@ -38,13 +38,13 @@ Three useful classes are defined in this header:
 
 ### Basic Rules
 
-+ Event data should be accessed/modified via the corresponding `Signal` instance, using the member `data` of type `data_type`.
-+ `data_type` defaults to `VoidData`, which is an empty `struct`. Signals and slots with void data should be declared respectively as `Signal<> signal;`, and `Slot<> slot;` or `MemberSlot<handle_type> slot;`.
-+ In this library, _**slots listen to signals**_ meanning that the connections between signals and slots are made from the slots interfaces (either `Slot` or `MemberSlot`), using the method `void listen_to( signal_ptr s )` to connect, or `void detach()` to disconnect.
-+ The `Slot` class should be used only with non-member callback functions, whereas the `MemberSlot` class should be used only with member callback functions.
-+ Boths `Slot` and `MemberSlot` can listen to the same `Signal`.
-+ The generic signature of any callback function is `void callback_function( const data_type& data );`, __unless__ slots without data are used, in which case the prototype/signature of callback functions is simply `void callback_function();`.
-+ Slots can only be attached to signals with the __same__ `data_type`.
+1. Event data should be accessed/modified via the corresponding `Signal` instance, using the member `data` of type `data_type`.
+1. `data_type` defaults to `VoidData`, which is an empty `struct`. Signals and slots with void data should be declared respectively as `Signal<> signal;`, and `Slot<> slot;` or `MemberSlot<handle_type> slot;` (_i.e._ omitting the template argument, but without removing the angular brackets).
+1. In this library, __slots listen to signals__ meanning that the connections between signals and slots are made from the slots interfaces (either `Slot` or `MemberSlot`), using the method `void listen_to( signal_ptr s )` to connect, or `void detach()` to disconnect.
+1. The `Slot` class should be used only with non-member callback functions, whereas the `MemberSlot` class should be used only with member callback functions.
+1. Boths `Slot` and `MemberSlot` can listen to the same `Signal` (_i.e._ both can be stored in the signal's set).
+1. The generic signature of any callback function is `void callback_function( const data_type& data );`, __unless__ slots without data are used, in which case the prototype/signature of callback functions is simply `void callback_function();`.
+1. Slots can only be attached to signals with the __same__ `data_type`.
 
 ### The `Signal` class
 
