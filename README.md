@@ -43,7 +43,7 @@ Three useful classes are defined in this header:
 1. In this library, __slots listen to signals__ meanning that the connections between signals and slots are made from the _slots_ interfaces (either `Slot` or `MemberSlot`), using the method `void listen_to( signal_ptr s )` to connect, or `void detach()` to disconnect.
 1. `Slot`s are used only with non-member callback functions; `MemberSlot`s only with member callback functions.
 1. Slots can only be attached to signals with the __same__ `data_type`.
-1. Boths `Slot`s and `MemberSlot`s can listen to the same `Signal` (_i.e. _ both can be stored in the signal's set).
+1. Boths `Slot`s and `MemberSlot`s can listen to the same `Signal` (_ie_ both can be stored in the signal's set).
 
 ### The `Signal` class
 
