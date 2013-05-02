@@ -52,8 +52,8 @@ protected:
  * The Signal interface as seen by a Slot object.
  * 
  * A Signal stores its listeners (Slots) as a set of pointers to 
- * CallbackInterfaces. This allows to avoid duplicates, and provides 
- * an efficient way of "detaching" a specific Slot.
+ * CallbackInterfaces. This allows to avoid duplicates, and to access 
+ * specific Slot in logarithmic time.
  *
  * This interface provides the methods:
  * - attach: a new Slot is listening to this Signal
