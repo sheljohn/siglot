@@ -166,7 +166,7 @@ public:
 	typedef void (*callback_type)( data_input );
 
 	Slot() { clear(); }
-	Slot( callback_type f ) { bind(f); }
+	Slot( callback_type f ) { clear(); bind(f); }
 	~Slot() { clear(); }
 
 	inline void bind( callback_type f ) { callback = f; }
@@ -198,7 +198,7 @@ public:
 	typedef void (*callback_type)();
 
 	Slot() { clear(); }
-	Slot( callback_type f ) { bind(f); }
+	Slot( callback_type f ) { clear(); bind(f); }
 	~Slot() { clear(); }
 
 	inline void bind( callback_type f ) { callback = f; }
@@ -232,7 +232,7 @@ public:
 	typedef void (handle_type::*callback_type)( data_input );
 
 	MemberSlot() { clear(); }
-	MemberSlot( handle_ptr h, callback_type f ) { bind(h,f); }
+	MemberSlot( handle_ptr h, callback_type f ) { clear(); bind(h,f); }
 	~MemberSlot() { clear(); }
 
 	void clear()
@@ -274,7 +274,7 @@ public:
 	typedef void (handle_type::*callback_type)();
 
 	MemberSlot() { clear(); }
-	MemberSlot( handle_ptr h, callback_type f ) { bind(h,f); }
+	MemberSlot( handle_ptr h, callback_type f ) { clear(); bind(h,f); }
 	~MemberSlot() { clear(); }
 
 	void clear()
