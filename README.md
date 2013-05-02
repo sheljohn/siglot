@@ -1,6 +1,6 @@
 #Siglot: Signals and Slots just got simpler
 
-Siglot is a clean, easy to read/understand, standalone, single-header, STL-only, C++ implementation of Signals and Slots.
+Siglot is a clean, easy to read/understand, single-header, STL-only, C++ implementation of Signals and Slots.
 
 ### About
 
@@ -12,7 +12,7 @@ Please send bug reports with minimal examples to the address displayed in the he
 
 ### License
 
-For my own curiosity only, please send me a short message as well to tell me if you use this, and what for. Rest assured that whatever you send me will remain private and _will not_ be disclosed under any circumstance.
+For my own curiosity only, it would also be nice to know what you use this for! Send me a short message if you can; whatever you send me _will not_ be disclosed under any circumstance (except torture maybe...).
 
 <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
 
