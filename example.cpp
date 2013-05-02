@@ -148,6 +148,12 @@ int main()
     my_signal.invoke();
 
     /**
+     * Uncomment this to test the notification of a Signal to its
+     * listeners when it is destroyed.
+     */
+    //my_signal.clear();
+
+    /**
      * Slot/MemberSlot can be detached using the method "detach".
      * This will deactivate them and remove them from the Signal 
      * callback set.

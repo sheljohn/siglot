@@ -29,12 +29,19 @@ struct VoidData {};
 template <typename data_type>
 class CallbackInterface
 {
+public:
+
+	CallbackInterface(): connected(false) {}
+
 protected:
 
 	template <typename U> friend class Signal;
 
-	// Notify Slots if their Signal is detroyed
-	virtual void disable_signal() =0;
+	// Tells if the Callback is connected to a Signal
+	bool connected;
+
+	// Used by a Signal at its destruction to notify Slots
+	inline void disconnect() { connected = false; }
 
 	// Trigger the callback function
 	virtual void operator() ( const data_type& data ) =0;
@@ -80,9 +87,6 @@ protected:
  * to a Signal:
  * - detach   : breaks the connection Slot-Signal
  * - listen_to: attach this Slot to the input Signal
- * ----
- * - detach_signal : delete pointer to this Slot in the Signal's set
- * - disable_signal: set the local pointer to the attached Signal to 0
  */
 template <typename data_type>
 class ListenerInterface : public CallbackInterface<data_type>
@@ -94,22 +98,21 @@ public:
 
 	void detach()
 		{
-			detach_signal();
-			disable_signal();
+			if ( this->connected && signal ) signal->detach(this);
+			this->disconnect();
+			signal = nullptr;
 		}
 
 	void listen_to( signal_ptr s )
 		{
 			signal = s;
 			s->attach(this);
+			this->connected = true;
 		}
 
 protected:
 
 	signal_ptr signal;
-
-	inline void detach_signal()  { if ( signal ) signal->detach(this); }
-	inline void disable_signal() { signal = nullptr; }
 };
 
 
@@ -133,7 +136,7 @@ struct Signal : public SlotSet<data_type>
 
 	void clear()
 		{ 
-			for ( auto slot : this->slots ) slot->disable_signal();
+			for ( auto slot : this->slots ) slot->disconnect();
 			this->slots.clear();
 		}
 
@@ -168,7 +171,7 @@ public:
 
 	inline void bind( callback_type f ) { callback = f; }
 	inline void clear() { this->detach(); }
-	inline bool is_active() const { return this->signal; }
+	inline bool is_active() const { return this->connected && this->signal; }
 
 protected:
 
@@ -200,7 +203,7 @@ public:
 
 	inline void bind( callback_type f ) { callback = f; }
 	inline void clear() { this->detach(); }
-	inline bool is_active() const { return this->signal; }
+	inline bool is_active() const { return this->connected && this->signal; }
 
 protected:
 
@@ -244,7 +247,7 @@ public:
 			callback = f;
 		}
 
-	inline bool is_active() const { return handle && this->signal; }
+	inline bool is_active() const { return handle && this->connected && this->signal; }
 
 protected:
 
@@ -286,7 +289,7 @@ public:
 			callback = f;
 		}
 
-	inline bool is_active() const { return handle && this->signal; }
+	inline bool is_active() const { return handle && this->connected && this->signal; }
 
 protected:
 
