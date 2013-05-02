@@ -2,11 +2,10 @@
 #define __SIGLOT__
 
 #include <set>
-#include <functional>
 
 //=============================================
 // @filename     siglot.h
-// @date         April 30th 2013
+// @date         May 2nd 2013
 // @author       Sheljohn (Jonathan H)
 // @contact      sh3ljohn+siglot [at] gmail
 // @license      Creative Commons by-sa 3.0 
@@ -37,7 +36,7 @@ protected:
 
 	template <typename U> friend class Signal;
 
-	// Tells if the Callback is connected to a Signal
+	// Tells if this Callback is connected to a Signal
 	bool connected;
 
 	// Used by a Signal at its destruction to notify Slots
