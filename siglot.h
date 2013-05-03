@@ -2,6 +2,9 @@
 #define __SIGLOT__
 
 #include <set>
+#define DISABLE_COPY_AND_ASSIGN(TypeName) \
+  TypeName(const self_type&) {} \
+  void operator= (const self_type&) {}
 
 //=============================================
 // @filename     siglot.h
@@ -127,10 +130,15 @@ protected:
  * The method "invoke" triggers the callback functions of all attached Slots.
  */
 template <typename data_type = VoidData>
-struct Signal : public SlotSet<data_type>
+class Signal : public SlotSet<data_type>
 {
+public:
+
+	typedef Signal<data_type> self_type;
+
 	data_type data;
 
+	Signal() {}
 	~Signal() { clear(); }
 
 	void clear()
@@ -143,6 +151,9 @@ struct Signal : public SlotSet<data_type>
 		{
 			for ( auto slot : this->slots ) (*slot)(data);
 		}
+
+private:
+	DISABLE_COPY_AND_ASSIGN( Signal )
 };
 
 
@@ -161,6 +172,7 @@ class Slot : public ListenerInterface<data_type>
 {
 public:
 
+	typedef Slot<data_type> self_type;
 	typedef const data_type& data_input;
 	typedef void (*callback_type)( data_input );
 
@@ -176,6 +188,9 @@ protected:
 
 	inline void operator() ( data_input data ) { callback(data); }
 	callback_type callback;
+
+private:
+	DISABLE_COPY_AND_ASSIGN( Slot )
 };
 
 
@@ -193,6 +208,7 @@ class Slot<VoidData> : public ListenerInterface<VoidData>
 {
 public:
 
+	typedef Slot<VoidData> self_type;
 	typedef const VoidData& data_input;
 	typedef void (*callback_type)();
 
@@ -208,6 +224,9 @@ protected:
 
 	inline void operator() ( data_input data ) { callback(); }
 	callback_type callback;
+
+private:
+	DISABLE_COPY_AND_ASSIGN( Slot )
 };
 
 
@@ -226,6 +245,7 @@ class MemberSlot : public ListenerInterface<data_type>
 {
 public:
 
+	typedef MemberSlot<handle_type,data_type> self_type;
 	typedef handle_type* handle_ptr;
 	typedef const data_type& data_input;
 	typedef void (handle_type::*callback_type)( data_input );
@@ -253,6 +273,9 @@ protected:
 	inline void operator() ( data_input data ) { (handle->*callback)(data); }
 	callback_type callback;
 	handle_ptr handle;
+
+private:
+	DISABLE_COPY_AND_ASSIGN( MemberSlot )
 };
 
 
@@ -268,6 +291,7 @@ class MemberSlot<handle_type,VoidData> : public ListenerInterface<VoidData>
 {
 public:
 
+	typedef MemberSlot<handle_type,VoidData> self_type;
 	typedef handle_type* handle_ptr;
 	typedef const VoidData& data_input;
 	typedef void (handle_type::*callback_type)();
@@ -295,6 +319,9 @@ protected:
 	inline void operator() ( data_input data ) { (handle->*callback)(); }
 	callback_type callback;
 	handle_ptr handle;
+
+private:
+	DISABLE_COPY_AND_ASSIGN( MemberSlot )
 };
 
 }
