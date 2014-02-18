@@ -2,15 +2,11 @@
 #define __SIGLOT__
 
 #include <set>
-#define DISABLE_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const self_type&) {} \
-  void operator= (const self_type&) {}
 
 //=============================================
 // @filename     siglot.h
-// @date         May 2nd 2013
 // @author       Sheljohn (Jonathan H)
-// @contact      sh3ljohn+siglot [at] gmail
+// @contact      Jonathan.hadida@dtc.ox.ac.uk
 // @license      Creative Commons by-sa 3.0 
 //               http://creativecommons.org/licenses/by-sa/3.0/
 //=============================================
@@ -43,7 +39,7 @@ protected:
 	bool connected;
 
 	// Used by a Signal at its destruction to notify Slots
-	inline void disconnect() { connected = false; }
+	inline void _disconnect() { connected = false; }
 
 	// Trigger the callback function
 	virtual void operator() ( const data_type& data ) =0;
@@ -70,6 +66,7 @@ public:
 
 	typedef CallbackInterface<data_type> slot_type;
 	typedef slot_type* slot_ptr;
+	typedef SlotSet<data_type> self;
 
 	inline unsigned count() const { return slots.size(); }
 
@@ -77,9 +74,14 @@ protected:
 
 	template <typename U> friend class ListenerInterface;
 
+	inline void _copy( const self *other )
+	{
+		if ( other != this ) slots = other->slots;
+	}
+
 	std::set<slot_ptr> slots;
-	inline void attach( slot_ptr s ) { slots.insert(s); }
-	inline void detach( slot_ptr s ) { slots.erase(s); }
+	inline void _attach( slot_ptr s ) { slots.insert(s); }
+	inline void _detach( slot_ptr s ) { slots.erase(s); }
 };
 
 
@@ -97,22 +99,32 @@ public:
 
 	typedef SlotSet<data_type> signal_type;
 	typedef signal_type* signal_ptr;
+	typedef ListenerInterface<data_type> self;
 
 	void detach()
-		{
-			if ( this->connected && signal ) signal->detach(this);
-			this->disconnect();
-			signal = nullptr;
-		}
+	{
+		if ( this->connected && signal ) signal->_detach(this);
+		this->_disconnect();
+		signal = nullptr;
+	}
 
 	void listen_to( signal_ptr s )
-		{
-			signal = s;
-			s->attach(this);
-			this->connected = true;
-		}
+	{
+		signal = s;
+		s->_attach(this);
+		this->connected = true;
+	}
+
+	inline virtual bool is_active() { return this->connected = _is_active(); }
+	inline bool _is_active() const { return this->connected && signal; }
 
 protected:
+
+	void copy( const self *other )
+	{
+		if ( other != this && other->_is_active() )
+			listen_to( other->signal );
+	}
 
 	signal_ptr signal;
 };
@@ -134,26 +146,31 @@ class Signal : public SlotSet<data_type>
 {
 public:
 
-	typedef Signal<data_type> self_type;
+	typedef Signal<data_type> self;
 
 	data_type data;
 
 	Signal() {}
 	~Signal() { clear(); }
 
+	Signal( const self& other ) {}
+	self& operator= ( const self& other ) {}
+
+	inline void copy( const self& other )
+	{
+		this->_copy( &other );
+	}
+
 	void clear()
-		{ 
-			for ( auto slot : this->slots ) slot->disconnect();
-			this->slots.clear();
-		}
+	{ 
+		for ( auto slot : this->slots ) slot->_disconnect();
+		this->slots.clear();
+	}
 
 	void invoke() const
-		{
-			for ( auto slot : this->slots ) (*slot)(data);
-		}
-
-private:
-	DISABLE_COPY_AND_ASSIGN( Signal )
+	{
+		for ( auto slot : this->slots ) (*slot)(data);
+	}
 };
 
 
@@ -172,7 +189,7 @@ class Slot : public ListenerInterface<data_type>
 {
 public:
 
-	typedef Slot<data_type> self_type;
+	typedef Slot<data_type> self;
 	typedef const data_type& data_input;
 	typedef void (*callback_type)( data_input );
 
@@ -180,17 +197,16 @@ public:
 	Slot( callback_type f ) { clear(); bind(f); }
 	~Slot() { clear(); }
 
+	Slot( const self& other ) { this->copy( &other ); }
+	self& operator= ( const self& other ) { this->copy( &other ); }
+
 	inline void bind( callback_type f ) { callback = f; }
 	inline void clear() { this->detach(); }
-	inline bool is_active() const { return this->connected && this->signal; }
 
 protected:
 
 	inline void operator() ( data_input data ) { callback(data); }
 	callback_type callback;
-
-private:
-	DISABLE_COPY_AND_ASSIGN( Slot )
 };
 
 
@@ -208,7 +224,7 @@ class Slot<VoidData> : public ListenerInterface<VoidData>
 {
 public:
 
-	typedef Slot<VoidData> self_type;
+	typedef Slot<VoidData> self;
 	typedef const VoidData& data_input;
 	typedef void (*callback_type)();
 
@@ -216,17 +232,16 @@ public:
 	Slot( callback_type f ) { clear(); bind(f); }
 	~Slot() { clear(); }
 
+	Slot( const self& other ) { this->copy( &other ); }
+	self& operator= ( const self& other ) { this->copy( &other ); }
+
 	inline void bind( callback_type f ) { callback = f; }
 	inline void clear() { this->detach(); }
-	inline bool is_active() const { return this->connected && this->signal; }
 
 protected:
 
 	inline void operator() ( data_input data ) { callback(); }
 	callback_type callback;
-
-private:
-	DISABLE_COPY_AND_ASSIGN( Slot )
 };
 
 
@@ -245,7 +260,7 @@ class MemberSlot : public ListenerInterface<data_type>
 {
 public:
 
-	typedef MemberSlot<handle_type,data_type> self_type;
+	typedef MemberSlot<handle_type,data_type> self;
 	typedef handle_type* handle_ptr;
 	typedef const data_type& data_input;
 	typedef void (handle_type::*callback_type)( data_input );
@@ -254,28 +269,28 @@ public:
 	MemberSlot( handle_ptr h, callback_type f ) { clear(); bind(h,f); }
 	~MemberSlot() { clear(); }
 
+	MemberSlot( const self& other ) { this->copy( &other ); }
+	self& operator= ( const self& other ) { this->copy( &other ); }
+
 	void clear()
-		{
-			this->detach();
-			handle = nullptr;
-		}
+	{
+		this->detach();
+		handle = nullptr;
+	}
 
 	void bind( handle_ptr h, callback_type f ) 
-		{ 
-			handle   = h;
-			callback = f;
-		}
+	{ 
+		handle   = h;
+		callback = f;
+	}
 
-	inline bool is_active() const { return handle && this->connected && this->signal; }
+	inline bool is_active() { return handle && (this->connected = this->_is_active()); }
 
 protected:
 
 	inline void operator() ( data_input data ) { (handle->*callback)(data); }
 	callback_type callback;
 	handle_ptr handle;
-
-private:
-	DISABLE_COPY_AND_ASSIGN( MemberSlot )
 };
 
 
@@ -291,7 +306,7 @@ class MemberSlot<handle_type,VoidData> : public ListenerInterface<VoidData>
 {
 public:
 
-	typedef MemberSlot<handle_type,VoidData> self_type;
+	typedef MemberSlot<handle_type,VoidData> self;
 	typedef handle_type* handle_ptr;
 	typedef const VoidData& data_input;
 	typedef void (handle_type::*callback_type)();
@@ -299,6 +314,9 @@ public:
 	MemberSlot() { clear(); }
 	MemberSlot( handle_ptr h, callback_type f ) { clear(); bind(h,f); }
 	~MemberSlot() { clear(); }
+
+	MemberSlot( const self& other ) { this->copy( &other ); }
+	self& operator= ( const self& other ) { this->copy( &other ); }
 
 	void clear()
 		{
@@ -312,16 +330,13 @@ public:
 			callback = f;
 		}
 
-	inline bool is_active() const { return handle && this->connected && this->signal; }
+	inline bool is_active() { return handle && (this->connected = this->_is_active()); }
 
 protected:
 
 	inline void operator() ( data_input data ) { (handle->*callback)(); }
 	callback_type callback;
 	handle_ptr handle;
-
-private:
-	DISABLE_COPY_AND_ASSIGN( MemberSlot )
 };
 
 }
