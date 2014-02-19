@@ -2,6 +2,7 @@
 #define __SIGLOT__
 
 #include <set>
+#include <type_traits>
 
 //=============================================
 // @filename     siglot.h
@@ -29,17 +30,17 @@ class CallbackInterface
 {
 public:
 
-	CallbackInterface(): connected(false) {}
+	CallbackInterface(): active(false) {}
 
 protected:
 
 	template <typename U> friend class Signal;
 
-	// Tells if this Callback is connected to a Signal
-	bool connected;
+	// Is the Callback subscribed to a Signal?
+	bool active;
 
-	// Used by a Signal at its destruction to notify Slots
-	inline void _disconnect() { connected = false; }
+	// Used upon Signal destruction to deactivate subscribed Slots
+	inline void _deactivate() { active = false; }
 
 	// Trigger the callback function
 	virtual void operator() ( const data_type& data ) =0;
@@ -50,14 +51,14 @@ protected:
 /**
  * The Signal interface as seen by a Slot object.
  * 
- * A Signal stores its listeners (Slots) as a set of pointers to 
+ * A Signal stores its subscribers (Slots) as a set of pointers to 
  * CallbackInterfaces. This allows to avoid duplicates, and to access 
- * specific Slot in logarithmic time.
+ * specific Slots (eg for deactivation) in logarithmic time.
  *
  * This interface provides the methods:
- * - attach: a new Slot is listening to this Signal
- * - detach: a specific Slot goes off
- * - count : returns the number of currently attached Slots
+ * - _subscribe  : a new Slot subscribes to the Signal
+ * - _unsubscribe: a specific Slot unsubscribes
+ * - count       : returns the number of currently subscribed Slots
  */
 template <typename data_type>
 class SlotSet
@@ -68,32 +69,35 @@ public:
 	typedef slot_type* slot_ptr;
 	typedef SlotSet<data_type> self;
 
+	// Count number of slots currently subscribed
 	inline unsigned count() const { return slots.size(); }
 
 protected:
 
 	template <typename U> friend class ListenerInterface;
 
+	// Copy the list of slots
 	inline void _copy( const self *other )
 	{
 		if ( other != this ) slots = other->slots;
 	}
 
+	// Insertion/deletion in the slot set
 	std::set<slot_ptr> slots;
-	inline void _attach( slot_ptr s ) { slots.insert(s); }
-	inline void _detach( slot_ptr s ) { slots.erase(s); }
+	inline void _subscribe( slot_ptr s ) { slots.insert(s); }
+	inline void _unsubsribe( slot_ptr s ) { slots.erase(s); }
 };
 
 
 
 /**
- * This interface defines the Slot-actions which are essentially related 
- * to a Signal:
- * - detach   : breaks the connection Slot-Signal
- * - listen_to: attach this Slot to the input Signal
+ * Defines Slot-actions related to a Signal:
+ * - unsubscribe: from registered Signal
+ * - subscribe  : to Signal
  */
 template <typename data_type>
-class ListenerInterface : public CallbackInterface<data_type>
+class ListenerInterface 
+	: public CallbackInterface<data_type>
 {
 public:
 
@@ -101,32 +105,76 @@ public:
 	typedef signal_type* signal_ptr;
 	typedef ListenerInterface<data_type> self;
 
-	void detach()
+	// Ask Signal to remove the current Slot from its set
+	// and switch to "inactive" state
+	void unsubscribe()
 	{
-		if ( this->connected && signal ) signal->_detach(this);
-		this->_disconnect();
+		if ( _is_active() ) signal->_unsubsribe(this);
+		this->_deactivate();
 		signal = nullptr;
 	}
 
-	void listen_to( signal_ptr s )
+	// Subscribe to a specific signal
+	void subscribe( signal_ptr s )
 	{
 		signal = s;
-		s->_attach(this);
-		this->connected = true;
+		s->_subscribe(this);
+		this->active = true;
 	}
 
-	inline virtual bool is_active() { return this->connected = _is_active(); }
-	inline bool _is_active() const { return this->connected && signal; }
+	// Check current state
+	inline virtual bool is_active() { return _is_active(); }
 
 protected:
 
-	void copy( const self *other )
+	// Internal inherited methods to check the current state
+	inline bool _is_active() { return this->active = (this->active && signal); }
+	inline bool _is_active() const { return this->active && signal; }
+
+	// Copy the Signal registered in a sibling
+	void _copy( const self *other )
 	{
 		if ( other != this && other->_is_active() )
-			listen_to( other->signal );
+			subscribe( other->signal );
 	}
 
 	signal_ptr signal;
+};
+
+
+
+/**
+ * Callback objects.
+ * These define the types of callback functions for both Slots and MemberSlots,
+ * whether the data type is void or not, and provide proxy to the corresponding 
+ * function call.
+ */
+template <typename data_type = VoidData> struct SlotCallback
+{
+	typedef const data_type& data_input;
+	typedef void (*type)( data_input );
+
+	inline static void callback( const data_type& data, type cb ) { (*cb)(data); }
+};
+template <> struct SlotCallback<VoidData>
+{
+	typedef void (*type)();
+
+	inline static void callback( const VoidData& data, type cb ) { (*cb)(); }
+};
+
+template <typename handle_type, typename data_type = VoidData> struct MemberSlotCallback
+{
+	typedef const data_type& data_input;
+	typedef void (handle_type::*type)( data_input );
+
+	inline static void callback( const data_type& data, handle_type *H, type cb ) { (H->*cb)(data); }
+};
+template <typename handle_type> struct MemberSlotCallback<handle_type,VoidData>
+{
+	typedef void (handle_type::*type)();
+
+	inline static void callback( const VoidData& data, handle_type *H, type cb ) { (H->*cb)(); }
 };
 
 
@@ -139,10 +187,11 @@ protected:
 /**
  * The Signal class to use in your code.
  * The template argument corresponds to the type of the "event data structure".
- * The method "invoke" triggers the callback functions of all attached Slots.
+ * The method "invoke" triggers the callback functions of all subscribed Slots.
  */
 template <typename data_type = VoidData>
-class Signal : public SlotSet<data_type>
+class Signal 
+	: public SlotSet<data_type>
 {
 public:
 
@@ -153,20 +202,21 @@ public:
 	Signal() {}
 	~Signal() { clear(); }
 
+	// Nothing is done by default on copy/assignment
 	Signal( const self& other ) {}
 	self& operator= ( const self& other ) {}
 
-	inline void copy( const self& other )
-	{
-		this->_copy( &other );
-	}
+	// Copy of the slots set should be explicitly called
+	inline void copy( const self& other ) { this->_copy( &other ); }
 
+	// Disconnect all slots on cleanup
 	void clear()
 	{ 
-		for ( auto slot : this->slots ) slot->_disconnect();
+		for ( auto slot : this->slots ) slot->_deactivate();
 		this->slots.clear();
 	}
 
+	// Trigger the signal and invoke all callback functions
 	void invoke() const
 	{
 		for ( auto slot : this->slots ) (*slot)(data);
@@ -176,106 +226,90 @@ public:
 
 
 /**
- * The Slot class is to be used with non-member functions callbacks:
- * - bind     : bind the slot to a callback function
- * - is_active: tells if the Slot is connected to a Signal
+ * Slots are used with NON-MEMBER functions callbacks:
+ * - bind     : binds the Slot to a callback function
+ * - is_active: checks the current Slot state
  *
  * NOTE:
  * The callback function must have the following signature
  * void callback_function( const data_type& data )
  */
 template <typename data_type = VoidData>
-class Slot : public ListenerInterface<data_type>
+class Slot 
+	: public ListenerInterface<data_type>
 {
 public:
 
 	typedef Slot<data_type> self;
-	typedef const data_type& data_input;
-	typedef void (*callback_type)( data_input );
+	typedef typename SlotCallback<data_type>::type callback_type;
 
 	Slot() { clear(); }
 	Slot( callback_type f ) { clear(); bind(f); }
 	~Slot() { clear(); }
 
-	Slot( const self& other ) { this->copy( &other ); }
-	self& operator= ( const self& other ) { this->copy( &other ); }
+	Slot( const self& other ) { clear(); copy(); }
+	self& operator= ( const self& other ) { copy(); }
 
-	inline void bind( callback_type f ) { callback = f; }
-	inline void clear() { this->detach(); }
+	void clear() 
+	{ 
+		this->unsubscribe(); 
+		callback = nullptr;
+	}
+
+	void bind( callback_type f ) { callback = f; }
+	inline bool is_active() { return callback && this->_is_active(); }
 
 protected:
 
-	inline void operator() ( data_input data ) { callback(data); }
+	void copy( const self& other )
+	{
+		if ( &other != this )
+		{
+			callback = other.callback;
+			this->_copy( &other ); 
+		}
+	}
+
+	inline void operator() ( const data_type& data ) 
+	{ SlotCallback<data_type>::callback(data,callback); }
+	
 	callback_type callback;
 };
 
 
 
 /**
- * Template specialization for Signals without data.
- * To be declared as follows: Slot<> s( callback_function );
- *
- * NOTE:
- * In this case, the callback function must have the following signature:
- * void callback_function()
- */
-template <>
-class Slot<VoidData> : public ListenerInterface<VoidData>
-{
-public:
-
-	typedef Slot<VoidData> self;
-	typedef const VoidData& data_input;
-	typedef void (*callback_type)();
-
-	Slot() { clear(); }
-	Slot( callback_type f ) { clear(); bind(f); }
-	~Slot() { clear(); }
-
-	Slot( const self& other ) { this->copy( &other ); }
-	self& operator= ( const self& other ) { this->copy( &other ); }
-
-	inline void bind( callback_type f ) { callback = f; }
-	inline void clear() { this->detach(); }
-
-protected:
-
-	inline void operator() ( data_input data ) { callback(); }
-	callback_type callback;
-};
-
-
-
-/**
- * The MemberSlot class is to be used with member-function callbacks:
- * - bind     : bind the slot to the current instance and the member callback function
- * - is_active: tells if the Slot is connected to a Signal
+ * MemberSlots are used with MEMBER-function callbacks:
+ * - bind     : bind to an instance and its member callback function
+ * - is_active: checks the current Slot state
  *
  * NOTE: The binding function is used as follows:
  * MemberSlot<handle_type,data_type> slot;
  * slot.bind(this, &handle_type::callback_function);
  */
 template <typename handle_type, typename data_type = VoidData>
-class MemberSlot : public ListenerInterface<data_type>
+class MemberSlot 
+	: public ListenerInterface<data_type>
 {
 public:
 
 	typedef MemberSlot<handle_type,data_type> self;
 	typedef handle_type* handle_ptr;
 	typedef const data_type& data_input;
-	typedef void (handle_type::*callback_type)( data_input );
+	typedef typename MemberSlotCallback<handle_type,data_type>::type callback_type;
 
 	MemberSlot() { clear(); }
 	MemberSlot( handle_ptr h, callback_type f ) { clear(); bind(h,f); }
 	~MemberSlot() { clear(); }
 
-	MemberSlot( const self& other ) { this->copy( &other ); }
-	self& operator= ( const self& other ) { this->copy( &other ); }
+	MemberSlot( handle_ptr h, const self& other ) { clear(); copy( h, other ); }
+	self& operator= ( const self& other ) { copy( handle, other ); }
 
 	void clear()
 	{
-		this->detach();
-		handle = nullptr;
+		this->unsubscribe();
+		handle   = nullptr;
+		callback = nullptr;
 	}
 
 	void bind( handle_ptr h, callback_type f ) 
@@ -284,57 +318,22 @@ public:
 		callback = f;
 	}
 
-	inline bool is_active() { return handle && (this->connected = this->_is_active()); }
+	inline bool is_active() { return handle && callback && this->_is_active(); }
 
 protected:
 
-	inline void operator() ( data_input data ) { (handle->*callback)(data); }
-	callback_type callback;
-	handle_ptr handle;
-};
-
-
-
-/**
- * Partial Template Specialization for Signals without data.
- * To be declared by omitting the second template parameter.
- *
- * NOTE: Same remark as before for the member callback function signature.
- */
-template <typename handle_type>
-class MemberSlot<handle_type,VoidData> : public ListenerInterface<VoidData>
-{
-public:
-
-	typedef MemberSlot<handle_type,VoidData> self;
-	typedef handle_type* handle_ptr;
-	typedef const VoidData& data_input;
-	typedef void (handle_type::*callback_type)();
-
-	MemberSlot() { clear(); }
-	MemberSlot( handle_ptr h, callback_type f ) { clear(); bind(h,f); }
-	~MemberSlot() { clear(); }
-
-	MemberSlot( const self& other ) { this->copy( &other ); }
-	self& operator= ( const self& other ) { this->copy( &other ); }
-
-	void clear()
+	void copy( handle_ptr h, const self& other ) 
+	{
+		if ( &other != this && h && other.is_active() )
 		{
-			this->detach();
-			handle = nullptr;
+			bind( h, other.callback );
+			this->_copy( &other );
 		}
+	}
 
-	void bind( handle_ptr h, callback_type f ) 
-		{ 
-			handle   = h;
-			callback = f;
-		}
+	inline void operator() ( data_input data ) 
+	{ MemberSlotCallback<handle_type,data_type>::callback(data,handle,callback); }
 
-	inline bool is_active() { return handle && (this->connected = this->_is_active()); }
-
-protected:
-
-	inline void operator() ( data_input data ) { (handle->*callback)(); }
 	callback_type callback;
 	handle_ptr handle;
 };

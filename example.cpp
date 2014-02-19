@@ -81,8 +81,8 @@ struct SomeClass
     SomeClass(): mslot(this, &SomeClass::member_callback) {}
 
 
-    void attach() { mslot.listen_to( &my_signal ); }
-    void detach() { mslot.detach(); }
+    void subscribe() { mslot.subscribe( &my_signal ); }
+    void unsubscribe() { mslot.unsubscribe(); }
 
 
     /**
@@ -133,7 +133,7 @@ int main()
      * the event.
      */
     my_signal.data.s = "Plain only";
-    slot.listen_to( &my_signal );
+    slot.subscribe( &my_signal );
     PRINT_EVENT_SEPARATOR(my_signal.count())
     my_signal.invoke();
 
@@ -143,7 +143,7 @@ int main()
      * the event. Both Slots should be called.
      */
     my_signal.data.s = "Both";
-    my_class.attach();
+    my_class.subscribe();
     PRINT_EVENT_SEPARATOR(my_signal.count())
     my_signal.invoke();
 
@@ -159,7 +159,7 @@ int main()
      * callback set.
      */
     my_signal.data.s = "Member only";
-    slot.detach();
+    slot.unsubscribe();
     PRINT_EVENT_SEPARATOR(my_signal.count())
     my_signal.invoke();
 
