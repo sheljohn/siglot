@@ -150,8 +150,7 @@ protected:
  */
 template <typename data_type = VoidData> struct SlotCallback
 {
-	typedef const data_type& data_input;
-	typedef void (*type)( data_input );
+	typedef void (*type)( const data_type& );
 
 	inline static void callback( const data_type& data, type cb ) { (*cb)(data); }
 };
@@ -164,8 +163,7 @@ template <> struct SlotCallback<VoidData>
 
 template <typename handle_type, typename data_type = VoidData> struct MemberSlotCallback
 {
-	typedef const data_type& data_input;
-	typedef void (handle_type::*type)( data_input );
+	typedef void (handle_type::*type)( const data_type& );
 
 	inline static void callback( const data_type& data, handle_type *H, type cb ) { (H->*cb)(data); }
 };
@@ -246,8 +244,8 @@ public:
 	Slot( callback_type f ) { clear(); bind(f); }
 	~Slot() { clear(); }
 
-	Slot( const self& other ) { clear(); copy(); }
-	self& operator= ( const self& other ) { copy(); }
+	Slot( const self& other ) { clear(); copy(other); }
+	self& operator= ( const self& other ) { copy(other); }
 
 	void clear() 
 	{ 
@@ -262,7 +260,7 @@ protected:
 
 	void copy( const self& other )
 	{
-		if ( &other != this )
+		if ( &other != this && other.is_active() )
 		{
 			callback = other.callback;
 			this->_copy( &other ); 
