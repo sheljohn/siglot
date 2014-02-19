@@ -37,7 +37,7 @@ protected:
 	template <typename U> friend class Signal;
 
 	// Is the Callback subscribed to a Signal?
-	bool active;
+	mutable bool active;
 
 	// Used upon Signal destruction to deactivate subscribed Slots
 	inline void _deactivate() { active = false; }
@@ -123,13 +123,12 @@ public:
 	}
 
 	// Check current state
-	inline virtual bool is_active() { return _is_active(); }
+	inline virtual bool is_active() const { return _is_active(); }
 
 protected:
 
 	// Internal inherited methods to check the current state
-	inline bool _is_active() { return this->active = (this->active && signal); }
-	inline bool _is_active() const { return this->active && signal; }
+	inline bool _is_active() const { return this->active = (this->active && signal); }
 
 	// Copy the Signal registered in a sibling
 	void _copy( const self *other )
@@ -257,7 +256,7 @@ public:
 	}
 
 	void bind( callback_type f ) { callback = f; }
-	inline bool is_active() { return callback && this->_is_active(); }
+	inline bool is_active() const { return callback && this->_is_active(); }
 
 protected:
 
@@ -318,7 +317,7 @@ public:
 		callback = f;
 	}
 
-	inline bool is_active() { return handle && callback && this->_is_active(); }
+	inline bool is_active() const { return handle && callback && this->_is_active(); }
 
 protected:
 
