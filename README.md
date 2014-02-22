@@ -18,7 +18,7 @@ Please send bug reports with minimal examples to the address displayed in the he
 
 ## Documentation
 
-DUE TO A RECENT UPDATE, THIS DOCUMENTATION AS WELL AS THE EXAMPLE FILE ARE CURRENTLY PARTIALLY OBSOLETE, PLEASE CHECK THE HEADER SOURCE DIRECTLY OR WAIT A FEW DAYS FOR AN UPDATE OF THE DOCUMENTATION. (Feb 19th 2014)
+_**Note:** due to a recent update, the example file does not cover all of the features available in this library. An extended version might be provided at a later point in time, but in the meantime, we invite users to dig into the following documentation and in the comments of the header instead, or to contact the author for more information if needed. (Feb 22nd 2014)_
 
 ### Examples
 
