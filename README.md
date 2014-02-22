@@ -1,10 +1,10 @@
-#Siglot (beta): Signals and Slots just got simpler
+#Siglot (beta): easy Signals and Slots
 
-Siglot is a clean, easy to read/understand, single-header, STL-only, C++11 implementation of Signals and Slots.
+Siglot is a neat, easy to read/understand, single-header, STL-only, C++11 implementation of Signals and Slots (suitablle for event-programming in C++).
 
 ### About
 
-I started this project to prove that Signals and Slots could be implemented easily and efficiently in C++ without calling heavy libraries like Qt, Boost or complicated headers like FastDelegates. I think I reached a satisfactory result with a clean 300-lines header (with comments), which includes only _two_ STL headers (standard 2011).
+I began Siglot thinking that signals and slots ought to be implemented simply and efficiently in C++ without calling heavy libraries like Qt, Boost or complicated headers like FastDelegates. I was surprised to find that actually, no easy standalone solution existed. I think I reached a satisfactory result with a clean 300-lines header (with comments), which includes only _two_ STL headers (standard 2011). The model follows a Pub/Sub pattern (publish & subscribe), and a single event propagation incurs only one indirection followed by a function call (scales linearly with the number of subscribers).
 
 ### Bug reports
 
