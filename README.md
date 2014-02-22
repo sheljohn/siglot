@@ -40,7 +40,7 @@ Three useful classes are defined in this header:
 1. Event data should be accessed/modified via the corresponding `Signal` instance, using the member `data` of type `data_type`.
 1. `data_type` defaults to `VoidData`, which is an empty `struct`. Signals and slots with void data should be declared respectively as `Signal<> signal;`, and `Slot<> slot;` or `MemberSlot<handle_type> slot;` ( _i.e._ omitting the template argument, but without removing the angular brackets).
 1. The prototype of callback functions/methods must be `void callback_function( const data_type& data );`, __unless__ `data_type == VoidData`, in which case it is simply `void callback_function();`.
-1. In this library, __slots listen to signals__ meaning that the connections between signals and slots are made from the _slots_ interfaces (either `Slot` or `MemberSlot`), using the method `void listen_to( signal_ptr s )` to connect, or `void detach()` to disconnect.
+1. In this library, **slots listen to signals** meaning that the connections between signals and slots are made from the _slots_ interfaces (either `Slot` or `MemberSlot`), using the method `void subscribe( signal_ptr s )` to connect, or `void unsubscribe()` to disconnect.
 1. `Slot`s are used only with non-member callback functions; `MemberSlot`s only with member callback functions.
 1. Slots can only be attached to signals with the __same__ `data_type`.
 1. Boths `Slot`s and `MemberSlot`s can listen to the same `Signal` ( _i.e._ both can be stored in the signal's set).
@@ -76,3 +76,11 @@ A `MemberSlot` instance can be thought of as a relay between the signal and a ca
 + The corresponding callback method of type `void (handle_type::*callback_type)( const data_type& data )` when `data_type` is not `VoidData`, and `void (handle_type::*callback_type)()` otherwise (hence the prototype restrictions mentionned above).
 
 See the above description of `Slot` for additional methods/features.
+
+### Copying Signals and Slots
+
+Here we discuss the behaviors of the copy constructor and assignment operator for the three main classes.
+
++ `Signal`s: by default, don't copy the list of subscribed slots. Use method `void copy( const self& other )` explicitely to copy the list of subscribers.
++ `Slot`s: both the copy constructor and the assignment operator copy the callback function and the signal subscribed to by the other instance.
++ `MemberSlot`s: the copy constructor expects **two** inputs -- a `handle_ptr` (pointer to class instance) and the other member slot `const self& other`. The assignment operator is available only if the `MemberSlot` has previously been assigned to a valid instance (cf. method `bind`).
