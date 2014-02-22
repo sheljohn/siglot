@@ -4,7 +4,7 @@ Siglot is a clean, easy to read/understand, single-header, STL-only, C++11 imple
 
 ### About
 
-I started this little project to prove that Signals and Slots could be implemented easily and efficiently in C++ without calling heavy libraries like Qt, Boost or complicated headers like FastDelegates. I think I reached a satisfactory result with a clean 300-lines header (with comments), which includes only _two_ STL headers (standard 2011).
+I started this project to prove that Signals and Slots could be implemented easily and efficiently in C++ without calling heavy libraries like Qt, Boost or complicated headers like FastDelegates. I think I reached a satisfactory result with a clean 300-lines header (with comments), which includes only _two_ STL headers (standard 2011).
 
 ### Bug reports
 
@@ -23,7 +23,7 @@ DUE TO A RECENT UPDATE, THIS DOCUMENTATION AS WELL AS THE EXAMPLE FILE ARE CURRE
 ### Examples
 
 Examples of usage are provided and commented in the `example.cpp` source file. You can compile it using the `makefile` provided.
-_**Note:** As it is, you will need g++ 4.7.2+ or another recent compiler supporting C++11 to compile these sources. However, adapting these sources for older C++ versions is be possible with almost no effort; contact me if you need to do it, I'll gladly help._
+_**Note:** you will need g++ 4.7.2+ or another recent compiler supporting C++11 to compile these sources._
 
 ### Useful Classes
 
