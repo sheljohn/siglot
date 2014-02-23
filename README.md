@@ -20,11 +20,6 @@ Please send bug reports with minimal examples to the address displayed in the he
 
 _**Note:** due to a recent update, the example file does not cover all of the features available in this library. An extended version might be provided at a later point in time, but in the meantime, we invite users to dig into the following documentation and in the comments of the header instead, or to contact the author for more information if needed. (Feb 22nd 2014)_
 
-### Examples
-
-Examples of usage are provided and commented in the `example.cpp` source file. You can compile it using the `makefile` provided.
-_**Note:** you will need g++ 4.7.2+ or another recent compiler supporting C++11 to compile these sources._
-
 ### Useful Classes
 
 Three useful classes are defined in this header:
@@ -84,3 +79,8 @@ Here we discuss the behaviors of the copy constructor and assignment operator fo
 + `Signal`s: by default, don't copy the list of subscribed slots. Use method `void copy( const self& other )` explicitely to copy the list of subscribers.
 + `Slot`s: both the copy constructor and the assignment operator copy the callback function and the signal subscribed to by the other instance.
 + `MemberSlot`s: the copy constructor expects **two** inputs -- a `handle_ptr` (pointer to class instance) and the other member slot `const self& other`. The assignment operator is available only if the `MemberSlot` has previously been assigned to a valid instance (cf. method `bind`).
+
+### Examples
+
+Examples of usage are provided and commented in the `example.cpp` source file. You can compile it using the `makefile` provided.
+_**Note:** you will need g++ 4.7.2+ or another recent compiler supporting C++11 to compile these sources._
