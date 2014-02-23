@@ -38,47 +38,47 @@ Three useful classes are defined in this header:
 1. In this library **slots listen to signals**, meaning that connections between signals and slots are established from _slots_ interfaces (either `Slot` or `MemberSlot`), using their methods `void subscribe(signal_ptr s)` to connect, or `void unsubscribe()` to disconnect.
 1. `Slot` is for non-member callback functions; `MemberSlot` only with member callback functions.
 1. Slots can only be attached to signals with **same** data type.
-1. Boths types of slots can listen to the same `Signal` ( _i.e._ both can be stored in the signal's set).
+1. Both types of slots can listen to the same `Signal` ( _i.e._ both can be stored in the signal's set).
 
 ### The `Signal` class
 
-A `Signal` instance stores its listeners (either `Slot`s or `MemberSlot`s) in a `std::set`. That way, handling duplicates is supported without affecting iteration complexity, and specific listener access/deletion are logarithmic in the number of listeners.
+Signals store their subscribers (`Slot` or `MemberSlot`) in a `std::set`. That way, handling duplicates is supported without affecting iteration complexity, and specific subscriber access/deletion are logarithmic.
 
 | Element | Description |
 |---|---|
 | `data_type data;` | [Member] Use to access/modify data before triggering an event. |
-| `void clear();` | Clear the list of listeners. _Complexity:_ linear in the current number of listeners. |
-| `unsigned count() const;` | Return the current number of listeners. _Complexity:_ constant. |
-| `void invoke() const;` | Trigger all attached callback functions. _Complexity:_ linear in the number of listeners. |
+| `void clear();` | Clear the list of subscribers. _Complexity:_ linear in number of subscribers. |
+| `unsigned count() const;` | Return current number of subscribers. _Complexity:_ constant. |
+| `void invoke() const;` | Trigger all attached callback functions. _Complexity:_ linear in number of subscribers. |
 
-More precisely, the `invoke` method loops over the set of slots and triggers the corresponding callback function for each slot. In effect, each of these trigger is equivalent to one indirection and a function call (which is nearly optimal?).
+Specifically, the `invoke` method loops over the set of slots and triggers the corresponding callback function for each slot. In effect, each of these trigger is equivalent to one indirection and a function call (which is optimal?).
 
 ### The `Slot` class
 
-A `Slot` instance can be thought of as a relay between the signal and a callback function. The most important method is `inline void bind( callback_type f );` which binds the instance to a non-member callback function of type `void (*callback_type)( const data_type& data )` when `data_type` is not `VoidData`, and `void (*callback_type)()` otherwise (hence the prototype restrictions mentionned above).
+Slots relay a signal to a callback function. The most important method `void bind(callback_type f)` binds the instance to a non-member callback function. For example, the function `void function(const data_tyep& data)` will be bound by a `Slot<data_type> s` as `s.bind( function )`. Note that if the data type is void, the callback function should _not_ take _any_ input.
 
 Additionally, both `Slot` and `MemberSlot` classes provide the following methods/features:
-+ Binding upon construction: an instance can be constructed with the same inputs than that of the corresponding `bind` function;
-+ Rebinding to another callback/instance of same type is also supported; simply use `bind` again to overwrite current settings;
-+ `bool is_active() const`: tells if the slot is attached to an active signal;
-+ `void clear()`: detach the slot from the corresponding signal.
++ Bind on construct: constructor overload expecting the same inputs than the `bind` function;
++ Rebinding to another callback using `bind` again works;
++ `bool is_active() const`: tesst if we are bound to an active signal;
++ `void clear()`: detach from signal and callback.
 
 ### The `MemberSlot` class
 
-A `MemberSlot` instance can be thought of as a relay between the signal and a callback method. The most important method is `inline void bind( handle_ptr h, callback_type f );` which binds the slot instance to:
+Member slots relay a signal to a callback member function. The most important method `void bind( handle_ptr h, callback_type f )` binds the slot instance to:
 
-+ An instance of type `handle_type` which defines the callback method; 
-+ The corresponding callback method of type `void (handle_type::*callback_type)( const data_type& data )` when `data_type` is not `VoidData`, and `void (handle_type::*callback_type)()` otherwise (hence the prototype restrictions mentionned above).
++ An instance of type `handle_type` that defines the member callback method; 
++ The callback method of type `void (handle_type::*callback_type)( const data_type& data )` when `data_type` is not `VoidData`, and `void (handle_type::*callback_type)()` otherwise.
 
-See the above description of `Slot` for additional methods/features.
+For example, if the member slot is defined as an attribute `mslot` of a class `A` that defines the method `void membercb(const data_type&  data)`, then it can be initialized from within the constructor like this: `mslot.bind(this, &A::membercb)`.
 
 ### Copying Signals and Slots
 
-Here we discuss the behaviors of the copy constructor and assignment operator for the three main classes.
+The behavior of the above classes via assignment operator or copy constructor are described here:
 
-+ `Signal`s: by default, don't copy the list of subscribed slots. Use method `void copy( const self& other )` explicitely to copy the list of subscribers.
-+ `Slot`s: both the copy constructor and the assignment operator copy the callback function and the signal subscribed to by the other instance.
-+ `MemberSlot`s: the copy constructor expects **two** inputs -- a `handle_ptr` (pointer to class instance) and the other member slot `const self& other`. The assignment operator is available only if the `MemberSlot` has previously been assigned to a valid instance (cf. method `bind`).
++ `Signal`: by default, don't copy the list of subscribed slots. Use method `void copy( const self& other )` explicitely to copy the list of subscribers.
++ `Slot`: copy constructor and the assignment operator both copy the callback function and the signal subscribed to by the other instance.
++ `MemberSlot`: the copy constructor expects **two** inputs -- a `handle_ptr` (pointer to class instance) and the other member slot `const self& other`. The assignment operator is available only if the `MemberSlot` has previously been assigned to a valid instance (cf. method `bind`).
 
 ### Examples
 
