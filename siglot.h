@@ -85,7 +85,7 @@ protected:
 	// Insertion/deletion in the slot set
 	std::set<slot_ptr> slots;
 	inline void _subscribe( slot_ptr s ) { slots.insert(s); }
-	inline void _unsubsribe( slot_ptr s ) { slots.erase(s); }
+	inline void _unsubscribe( slot_ptr s ) { slots.erase(s); }
 };
 
 
@@ -109,7 +109,7 @@ public:
 	// and switch to "inactive" state
 	void unsubscribe()
 	{
-		if ( _is_active() ) signal->_unsubsribe(this);
+		if ( _is_active() ) signal->_unsubscribe(this);
 		this->_deactivate();
 		signal = nullptr;
 	}
